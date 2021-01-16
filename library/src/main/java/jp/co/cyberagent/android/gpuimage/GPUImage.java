@@ -53,7 +53,9 @@ import jp.co.cyberagent.android.gpuimage.util.Rotation;
  * tasks through a simple interface.
  */
 public class GPUImage {
-
+    public interface OnSetImageListener {
+        void onSetImage(GPUImage gpuImage);
+    }
     public enum ScaleType {CENTER_INSIDE, CENTER_CROP}
 
     static final int SURFACE_TYPE_SURFACE_VIEW = 0;
@@ -68,6 +70,8 @@ public class GPUImage {
     private Bitmap currentBitmap;
     private ScaleType scaleType = ScaleType.CENTER_CROP;
     private int scaleWidth, scaleHeight;
+
+    private OnSetImageListener onSetImageListener;
 
     /**
      * Instantiates a new GPUImage object.
@@ -225,6 +229,9 @@ public class GPUImage {
         currentBitmap = bitmap;
         renderer.setImageBitmap(bitmap, false);
         requestRender();
+        if(onSetImageListener != null){
+            onSetImageListener.onSetImage(this);
+        }
     }
 
     /**
@@ -783,4 +790,13 @@ public class GPUImage {
     public GPUImageRenderer getRenderer() {
         return renderer;
     }
+
+    public OnSetImageListener getOnSetImageListener() {
+        return onSetImageListener;
+    }
+
+    public void setOnSetImageListener(OnSetImageListener onSetImageListener) {
+        this.onSetImageListener = onSetImageListener;
+    }
+
 }

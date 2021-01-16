@@ -25,6 +25,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import jp.co.cyberagent.android.gpuimage.GPUImageView
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageFilter
+import jp.co.cyberagent.android.gpuimage.filter.GPUImageFilterGroup
 import jp.co.cyberagent.android.gpuimage.sample.GPUImageFilterTools
 import jp.co.cyberagent.android.gpuimage.sample.GPUImageFilterTools.FilterAdjuster
 import jp.co.cyberagent.android.gpuimage.sample.R
@@ -51,7 +52,7 @@ class GalleryActivity : AppCompatActivity() {
 
         findViewById<View>(R.id.button_choose_filter).setOnClickListener {
             GPUImageFilterTools.showDialog(this) { filter ->
-                switchFilterTo(filter)
+                addFilterTo(filter)
                 gpuImageView.requestRender()
             }
         }
@@ -88,6 +89,22 @@ class GalleryActivity : AppCompatActivity() {
     private fun switchFilterTo(filter: GPUImageFilter) {
         if (gpuImageView.filter == null || gpuImageView.filter.javaClass != filter.javaClass) {
             gpuImageView.filter = filter
+            filterAdjuster = FilterAdjuster(filter)
+            if (filterAdjuster!!.canAdjust()) {
+                seekBar.visibility = View.VISIBLE
+                filterAdjuster!!.adjust(seekBar.progress)
+            } else {
+                seekBar.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun addFilterTo(filter: GPUImageFilter) {
+        if (gpuImageView.filter == null) {
+            switchFilterTo(filter)
+        }else if(gpuImageView.filter.javaClass != filter.javaClass){
+
+            gpuImageView.filter = GPUImageFilterGroup(listOf(gpuImageView.filter, filter))
             filterAdjuster = FilterAdjuster(filter)
             if (filterAdjuster!!.canAdjust()) {
                 seekBar.visibility = View.VISIBLE

@@ -290,20 +290,4 @@ public class GPUImageFilter {
         java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
         return s.hasNext() ? s.next() : "";
     }
-
-    public int getGlProgId() {
-        return glProgId;
-    }
-
-    public int getGlAttribPosition() {
-        return glAttribPosition;
-    }
-
-    public int getGlUniformTexture() {
-        return glUniformTexture;
-    }
-
-    public int getGlAttribTextureCoordinate() {
-        return glAttribTextureCoordinate;
-    }
 }

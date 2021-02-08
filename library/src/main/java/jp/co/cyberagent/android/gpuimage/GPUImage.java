@@ -403,6 +403,59 @@ public class GPUImage {
     }
 
     /**
+     * Gets the given bitmap with current filter applied as a Bitmap.
+     *
+     * @param bitmap  the bitmap on which the current filter should be applied
+     * @param recycle recycle the bitmap or not.
+     * @param outputWidth output bitmap width.
+     * @param outputHeight output bitmap height.
+     * @return the bitmap with filter applied
+     */
+    public Bitmap getBitmapWithFilterApplied(final Bitmap bitmap, boolean recycle, int outputWidth, int outputHeight) {
+        if (glSurfaceView != null || glTextureView != null) {
+            renderer.deleteImage();
+            renderer.runOnDraw(new Runnable() {
+
+                @Override
+                public void run() {
+                    synchronized (filter) {
+                        filter.destroy();
+                        filter.notify();
+                    }
+                }
+            });
+            synchronized (filter) {
+                requestRender();
+                try {
+                    filter.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        GPUImageRenderer renderer = new GPUImageRenderer(filter);
+        renderer.setRotation(Rotation.NORMAL,
+                this.renderer.isFlippedHorizontally(), this.renderer.isFlippedVertically());
+        renderer.setScaleType(scaleType);
+        PixelBuffer buffer = new PixelBuffer(outputWidth, outputHeight);
+        buffer.setRenderer(renderer);
+        renderer.setImageBitmap(bitmap, recycle);
+        Bitmap result = buffer.getBitmap();
+        filter.destroy();
+        renderer.deleteImage();
+        buffer.destroy();
+
+        this.renderer.setFilter(filter);
+        if (currentBitmap != null) {
+            this.renderer.setImageBitmap(currentBitmap, false);
+        }
+        requestRender();
+
+        return result;
+    }
+
+    /**
      * Gets the images for multiple filters on a image. This can be used to
      * quickly get thumbnail images for filters. <br>
      * Whenever a new Bitmap is ready, the listener will be called with the
